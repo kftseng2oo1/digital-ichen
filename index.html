@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="zh-TW"><head><!-- PWA Meta — auto-injected by PWA 打包神器 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>數位易經 - 三數起卦（優化版）</title>
+    
+    <!-- PWA Meta Tags -->
+    
+    
+    
+    
+    
+    
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        :root {
+            --gold: #d4af37;
+            --gold-light: #f1c40f;
+            --dark-bg: #1a1a1a;
+            --card-bg: rgba(26, 26, 26, 0.95);
+            --accent-red: #c44132;
+            --text-primary: #f5f5f0;
+            --text-secondary: #999;
+            --border-gold: rgba(212, 175, 55, 0.3);
+        }
+        
+        body {
+            font-family: 'Microsoft JhengHei', 'PingFang TC', 'Noto Serif TC', serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 10px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* 背景裝飾 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(212, 175, 55, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(212, 175, 55, 0.03) 0%, transparent 50%);
+            animation: bgRotate 30s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        @keyframes bgRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-gold);
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* 頂部工具列 */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-gold);
+        }
+        
+        .toolbar-btn {
+            background: rgba(70, 93, 114, 0.3);
+            border: 1px solid var(--border-gold);
+            color: var(--gold);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .toolbar-btn:hover {
+            background: rgba(212, 175, 55, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .toolbar-btn:active {
+            transform: translateY(0);
+        }
+        
+        .header { text-align: center; margin-bottom: 25px; }
+        
+        .title {
+            font-size: 32px;
+            color: var(--gold);
+            margin-bottom: 8px;
+            letter-spacing: 8px;
+            font-weight: 900;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+            animation: titleGlow 3s ease-in-out infinite;
+        }
+        
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 0 0 20px rgba(212, 175, 55, 0.3); }
+            50% { text-shadow: 0 0 30px rgba(212, 175, 55, 0.5); }
+        }
+        
+        .subtitle { 
+            color: var(--text-secondary); 
+            font-size: 13px; 
+            letter-spacing: 3px; 
+            font-style: italic;
+        }
+        
+        .version-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            color: var(--dark-bg);
+            padding: 5px 14px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3);
+        }
+        
+        .section { 
+            margin-bottom: 25px;
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .section-title {
+            font-size: 16px;
+            color: var(--gold);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-gold);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-title::before {
+            content: '✦';
+            font-size: 18px;
+        }
+        
+        .category-grid { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 12px; 
+        }
+        
+        .category-btn {
+            padding: 14px 10px;
+            background: linear-gradient(135deg, rgba(70, 93, 114, 0.2), rgba(70, 93, 114, 0.4));
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .category-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(212, 175, 55, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+        
+        .category-btn:active::before {
+            width: 200%;
+            height: 200%;
+        }
+        
+        .category-btn:active { 
+            transform: scale(0.95); 
+        }
+        
+        .category-btn.active { 
+            border-color: var(--gold); 
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.3));
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+        }
+        
+        .category-icon { 
+            font-size: 32px; 
+            margin-bottom: 6px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+            transition: transform 0.3s;
+        }
+        
+        .category-btn:hover .category-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+        
+        .category-name { 
+            font-size: 15px;
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .number-input-section { 
+            display: flex; 
+            justify-content: center; 
+            gap: 18px; 
+            margin: 25px 0; 
+        }
+        
+        .digit-input {
+            width: 75px;
+            height: 75px;
+            font-size: 36px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(70, 93, 114, 0.3), rgba(70, 93, 114, 0.5));
+            border: 2px solid var(--border-gold);
+            border-radius: 12px;
+            color: var(--gold);
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .digit-input:focus { 
+            outline: none; 
+            border-color: var(--gold); 
+            background: rgba(212, 175, 55, 0.15);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3), inset 0 2px 4px rgba(0,0,0,0.2);
+            transform: scale(1.05);
+        }
+        
+        .digit-input::placeholder {
+            color: rgba(212, 175, 55, 0.3);
+            font-size: 14px;
+        }
+        
+        .divination-btn {
+            width: 100%;
+            padding: 18px;
+            font-size: 20px;
+            background: linear-gradient(135deg, var(--accent-red) 0%, #a83529 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            letter-spacing: 6px;
+            font-weight: bold;
+            box-shadow: 0 6px 20px rgba(196, 65, 50, 0.4);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .divination-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .divination-btn:active::before {
+            width: 400%;
+            height: 400%;
+        }
+        
+        .divination-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(196, 65, 50, 0.5);
+        }
+        
+        .divination-btn:active:not(:disabled) {
+            transform: translateY(-1px);
+        }
+        
+        .divination-btn:disabled { 
+            opacity: 0.5; 
+            cursor: not-allowed; 
+            box-shadow: none; 
+        }
+        
+        .divination-btn.reset { 
+            background: linear-gradient(135deg, #465d72 0%, #5a7a96 100%); 
+            box-shadow: 0 6px 20px rgba(70, 93, 114, 0.4); 
+        }
+        
+        .result-section {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, rgba(30, 30, 30, 0.8), rgba(40, 40, 40, 0.6));
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            border-radius: 15px;
+            animation: resultSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        @keyframes resultSlideIn { 
+            from { 
+                opacity: 0; 
+                transform: translateY(30px) scale(0.95); 
+            } 
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+            } 
+        }
+        
+        .yao-text {
+            margin: 18px 0;
+            padding: 18px;
+            background: linear-gradient(90deg, rgba(212, 175, 55, 0.08), rgba(212, 175, 55, 0.03));
+            border-radius: 10px;
+            border-left: 4px solid var(--gold);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .yao-name { 
+            color: var(--gold); 
+            font-size: 17px; 
+            font-weight: bold; 
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .yao-content { 
+            color: var(--text-primary); 
+            font-size: 15px; 
+            line-height: 1.8; 
+        }
+        
+        .yao-keywords { 
+            margin-top: 12px; 
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .keyword-tag {
+            display: inline-block;
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            color: var(--gold);
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .tag-container { 
+            text-align: center; 
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .level-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .level-tag.good { 
+            background: linear-gradient(135deg, #27ae60, #2ecc71); 
+            color: white; 
+        }
+        
+        .level-tag.bad { 
+            background: linear-gradient(135deg, #c0392b, #e74c3c); 
+            color: white; 
+        }
+        
+        .level-tag.neutral { 
+            background: linear-gradient(135deg, #7f8c8d, #95a5a6); 
+            color: white; 
+        }
+        
+        .interpretation-box {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            line-height: 1.9;
+            color: #ddd;
+            margin-top: 18px;
+            font-size: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .interpretation-title {
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        /* 分享按鈕 */
+        .share-btn {
+            width: 100%;
+            margin-top: 15px;
+            padding: 12px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .share-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+        }
+        
+        /* 歷史記錄 */
+        .history-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(30, 30, 30, 0.6);
+            border-radius: 12px;
+            border: 1px solid var(--border-gold);
+        }
+        
+        .history-title {
+            font-size: 14px;
+            color: var(--gold);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .history-item {
+            padding: 10px;
+            background: rgba(70, 93, 114, 0.2);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+        
+        .history-item:hover {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: var(--gold);
+        }
+        
+        .history-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+        
+        .history-item-category {
+            color: var(--gold);
+            font-weight: bold;
+        }
+        
+        .history-item-time {
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+        
+        .history-item-result {
+            color: var(--text-secondary);
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+            border: 1px solid var(--border-gold);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -45%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 28px;
+            color: var(--gold);
+            cursor: pointer;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+        
+        .modal-close:hover {
+            background: rgba(212, 175, 55, 0.2);
+            transform: rotate(90deg);
+        }
+        
+        .modal-title {
+            font-size: 24px;
+            color: var(--gold);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .modal-text {
+            line-height: 1.8;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+        }
+        
+        .modal-text h3 {
+            color: var(--gold);
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .disclaimer {
+            margin-top: 25px;
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        /* 響應式設計 */
+        @media (max-width: 480px) {
+            .title { font-size: 28px; letter-spacing: 6px; }
+            .category-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+            .category-btn { padding: 10px 6px; }
+            .category-icon { font-size: 24px; }
+            .category-name { font-size: 11px; }
+            .digit-input { width: 65px; height: 65px; font-size: 30px; }
+            .number-input-section { gap: 12px; }
+            .toolbar { flex-direction: column; gap: 10px; }
+            .toolbar-btn { width: 100%; justify-content: center; }
+        }
+        
+        /* 載入動畫 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--gold);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+<meta name="application-name" content="數位易經"><meta name="description" content="數位易經"><meta name="theme-color" content="#1a73e8"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="數位易經"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon.svg"><script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(r => console.log('[SW] registered:', r.scope))
+        .catch(e => console.warn('[SW] registration failed:', e));
+    });
+  }</script></head>
+<body>
+    <div class="container">
+        <!-- 工具列 -->
+        <div class="toolbar">
+            <button class="toolbar-btn" onclick="showHelp()">
+                <span>📖</span>
+                <span>使用說明</span>
+            </button>
+            <button class="toolbar-btn" onclick="toggleHistory()">
+                <span>📜</span>
+                <span>占卜記錄</span>
+            </button>
+        </div>
+        
+        <!-- 標題 -->
+        <div class="header">
+            <div class="title">數位易經</div>
+            <div class="subtitle">三數通天機 · 誠意正心</div>
+            <div class="version-badge">優化版 v2.1</div>
+        </div>
+        
+        <!-- 選擇類別 -->
+        <div class="section">
+            <div class="section-title">選擇占卜事項</div>
+            <div class="category-grid">
+                <div class="category-btn" data-category="career">
+                    <div class="category-icon">🏢</div>
+                    <div class="category-name">事業</div>
+                </div>
+                <div class="category-btn" data-category="health">
+                    <div class="category-icon">🏥</div>
+                    <div class="category-name">健康</div>
+                </div>
+                <div class="category-btn" data-category="love">
+                    <div class="category-icon">💑</div>
+                    <div class="category-name">愛情</div>
+                </div>
+                <div class="category-btn" data-category="wealth">
+                    <div class="category-icon">💰</div>
+                    <div class="category-name">財運</div>
+                </div>
+                <div class="category-btn" data-category="investment">
+                    <div class="category-icon">📈</div>
+                    <div class="category-name">投資</div>
+                </div>
+                <div class="category-btn" data-category="marriage">
+                    <div class="category-icon">💍</div>
+                    <div class="category-name">婚姻</div>
+                </div>
+                <div class="category-btn" data-category="lawsuit">
+                    <div class="category-icon">⚖️</div>
+                    <div class="category-name">官司</div>
+                </div>
+                <div class="category-btn" data-category="property">
+                    <div class="category-icon">🏠</div>
+                    <div class="category-name">購屋</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 輸入數字 -->
+        <div class="section">
+            <div class="section-title">心中默念問題，輸入3個數字 (0-9)，百位數不得為零</div>
+            <div class="number-input-section">
+                <input type="tel" class="digit-input" id="digit1" maxlength="1" placeholder="百" inputmode="numeric">
+                <input type="tel" class="digit-input" id="digit2" maxlength="1" placeholder="十" inputmode="numeric">
+                <input type="tel" class="digit-input" id="digit3" maxlength="1" placeholder="個" inputmode="numeric">
+            </div>
+        </div>
+        
+        <!-- 占卜按鈕 -->
+        <button class="divination-btn" id="divinationBtn" disabled="">開始占卜</button>
+        
+        <!-- 結果區域 -->
+        <div class="result-section" id="resultSection" style="display: none;"></div>
+        
+        <!-- 歷史記錄區域 -->
+        <div class="history-section" id="historySection" style="display: none;">
+            <div class="history-title">
+                <span>📜</span>
+                <span>最近占卜記錄</span>
+            </div>
+            <div id="historyList"></div>
+        </div>
+        
+        <!-- 免責聲明 -->
+        <div class="disclaimer">
+            ⚠️ 本應用僅供娛樂參考，不構成任何決策建議<br>
+            重大決定請諮詢專業人士意見
+        </div>
+    </div>
+    
+    <!-- 說明 Modal -->
+    <div class="modal" id="helpModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeHelp()">×</span>
+            <h2 class="modal-title">📖 使用說明</h2>
+            <div class="modal-text">
+                <h3>🔮 什麼是三數起卦？</h3>
+                <p>三數起卦法源自《梅花易數》，是一種簡便靈活的占卜方法。透過三個數字（0-9），結合易經八卦原理，推演出卦象與動爻，從而得到占卜結果。</p>
+                
+                <h3>📝 如何使用？</h3>
+                <p><strong>1. 選擇占卜事項</strong><br>點選你想要占卜的類別（事業、健康、愛情等）</p>
+                
+                <p><strong>2. 心誠則靈</strong><br>在心中默念你的問題，保持專注與誠意</p>
+                
+                <p><strong>3. 輸入數字</strong><br>憑直覺輸入三個 0-9 的數字（百位、十位、個位），<strong>百位數不得為零</strong></p>
+                
+                <p><strong>4. 開始占卜</strong><br>點擊「開始占卜」按鈕，系統會自動計算卦象</p>
+                
+                <h3>🎯 計算原理</h3>
+                <p>• 第一個數字決定上卦（÷8 取餘數）<br>
+                • 第二、三個數字決定下卦（相加 ÷8 取餘數）<br>
+                • 三數相加決定動爻位置（÷6 取餘數）</p>
+                
+                <h3>💡 使用技巧</h3>
+                <p>• 同一問題不宜短時間內重複占卜<br>
+                • 保持內心平靜，不要帶著預設立場<br>
+                • 結果僅供參考，重大決策請謹慎判斷</p>
+            </div>
+        </div>
+    </div>
+    
+    
+
+
+</body></html>
