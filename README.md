@@ -4,13 +4,18 @@
 
 **線上使用**：https://kftseng2oo1.github.io/digital-ichen/
 
+## 主要功能
+- 八大類別：事業、健康、愛情、婚姻、財運、投資、官司、購屋
+- 輸入三個數字起卦，顯示卦名、動爻爻辭、運勢分數與詳細指引
+- 占卜紀錄、分享結果、📖 內建使用說明
+
 ## 檔案說明
-- `數位易經_優化版_v2.1.html`：**完整的 App**（約 330 KB，含全部卦象資料與程式）
-- `index.html`：PWA 入口，但目前**只有畫面、沒有任何 JavaScript**，按「開始占卜」不會有反應
+- `index.html`：完整的 App（PWA 入口）
+- `數位易經_優化版_v2.1.html`：原始完整版，與 index.html 內容相同，可刪除
 - `manifest.json`、`sw.js`、`offline.html`、圖示：PWA 安裝與離線用
 
-## 已知問題
-`index.html` 疑似打包時被截斷，只剩約 25 KB，和完整版差很多。修法：把 `數位易經_優化版_v2.1.html` 用 [autopack](https://github.com/kftseng2oo1/autopack) 重新打包，或直接把它的內容複製到 `index.html`（保留 manifest 與 SW 註冊）。
+## 備註
+2026-10 修復：原 `index.html` 打包時被截斷、沒有任何 JavaScript；已改用 v2.1 重建並保留 PWA 設定（見 PR #2）。
 
 ## 起卦原理
 - 第一數 ÷ 8 取餘數 → 上卦
