@@ -1,44 +1,22 @@
-# 數位易經
+# 數位易經 · 三數起卦（優化版 v2.1）
 
-> 數位易經
+用三個數字起卦的易經占卜工具。
 
-## 📦 包含檔案
+**線上使用**：https://kftseng2oo1.github.io/digital-ichen/
 
-- `icon-192.png`
-- `icon-512.png`
-- `manifest.json`
-- `sw.js`
-- `index.html`
-- `icon.svg`
-- `icon-maskable.svg`
-- `offline.html`
+## 檔案說明
+- `數位易經_優化版_v2.1.html`：**完整的 App**（約 330 KB，含全部卦象資料與程式）
+- `index.html`：PWA 入口，但目前**只有畫面、沒有任何 JavaScript**，按「開始占卜」不會有反應
+- `manifest.json`、`sw.js`、`offline.html`、圖示：PWA 安裝與離線用
 
-## 🚀 部署到 GitHub Pages
+## 已知問題
+`index.html` 疑似打包時被截斷，只剩約 25 KB，和完整版差很多。修法：把 `數位易經_優化版_v2.1.html` 用 [autopack](https://github.com/kftseng2oo1/autopack) 重新打包，或直接把它的內容複製到 `index.html`（保留 manifest 與 SW 註冊）。
 
-```bash
-git init
-git add .
-git commit -m "init: 數位易經 PWA"
-git branch -M main
-git remote add origin https://github.com/<username>/<repo>.git
-git push -u origin main
-```
+## 起卦原理
+- 第一數 ÷ 8 取餘數 → 上卦
+- 第二數 ÷ 8 取餘數 → 下卦
+- 三數相加 ÷ 6 取餘數 → 動爻
 
-然後在 GitHub repo → **Settings → Pages** → Source 選 `main` 分支，等待幾分鐘後即可訪問。
-
-## 📱 安裝 PWA
-
-在支援的瀏覽器（Chrome / Edge / Safari iOS）中打開網頁，  
-點擊「**安裝**」或「**加入主畫面**」即可將此 App 安裝到裝置。
-
-## ⚙ 技術規格
-
-| 項目 | 值 |
-|------|-----|
-| display | standalone |
-| theme_color | #1a73e8 |
-| lang | zh-TW |
-| scope | /digital-ichen/ |
-
----
-*由 [PWA 打包神器](https://github.com) 自動生成*
+## 相關 repo
+- [gold](https://github.com/kftseng2oo1/gold)、[DE2.3](https://github.com/kftseng2oo1/DE2.3)、[-_-_v2-1](https://github.com/kftseng2oo1/-_-_v2-1)：同系列的其他版本
+- [gamei](https://github.com/kftseng2oo1/gamei)：六十四卦學習遊戲
